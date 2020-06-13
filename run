@@ -1,3 +1,5 @@
 #!/bin/bash
 
-python3 /home/oyy/Pro/MeShareMe/manage.py runserver 0.0.0.0:8000 --insecure
+
+cd /home/oyy/Pro/MeShareMe/
+python3 /home/oyy/Pro/MeShareMe/manage.py runserver 0.0.0.0:8000 --insecure &> /tmp/a
