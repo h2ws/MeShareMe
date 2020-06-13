@@ -1,2 +1,2 @@
 # MeShareMe
-phone and  linux pc  with share
+Computer and mobile phone sharing with each other

@@ -1,0 +1,119 @@
+<html>
+    <head>
+<!-- <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script> -->
+ {% load static %}
+<script src="{% static 'MeShareMe/qrcode.min.js' %}"></script>
+    </head>
+    <body>
+	
+
+  {% csrf_token %}
+	
+    <textarea oninput="uploadText()" id="text" name="text" style="margin: 3px;width: 100%;height: 488px;">{{text}}</textarea>
+
+
+
+    
+    <input  type="button" onclick="uploadText()" value="upload Text" style="
+    display: none;
+    margin: 4 auto;
+    width: 300px;
+    height: 100px;
+"> 
+
+	<input onclick="easyUpload()" type="button" value="upload File" style="
+    display: block;
+    margin: 14 auto;
+    width: 80%;
+    height: 100px;
+">
+	<a id="file_download_a" href="/submit.downloadFile" download="{{filename}}">         
+	<input  id="file_download_input" type="button" value="download {{filename}}" style="
+    display: block;
+    margin: 14 auto;
+    width: 80%;
+    height: 100px;
+"></a>
+
+<div id="qrcode" 
+style="
+    display: block;
+    margin: 14 auto;
+    width: 512px;
+    float: left;
+">
+</div>
+
+<div id="ip_qrcode" 
+style="
+    display: block;
+    margin: 14 auto;
+    width: 512px;
+    float: right;
+">
+current url, (wifi essid: {{localwifi_essid}})
+</div>
+
+<script>
+function easyUpload(){
+
+  var input = document.createElement("input");
+  input.type = "file";
+  input.click();
+  input.onchange = function(){
+    var file = input.files[0];
+    var form = new FormData();
+    form.append("file", file); //第一个参数是后台读取的请求key值
+    form.append("filename", file.name);
+    form.append("other", "666666"); //实际业务的其他请求参数
+    form.append("csrfmiddlewaretoken", document.getElementsByName("csrfmiddlewaretoken")[0].value);
+    var xhr = new XMLHttpRequest();
+    var action = "/submit.uploadFile"; //上传服务的接口地址
+    xhr.open("POST", action);
+    xhr.onreadystatechange = function(){
+      if(xhr.readyState==4 && xhr.status==200){
+	alert(xhr.responseText)
+	document.getElementById("file_download_a").download = file.name
+	document.getElementById("file_download_input").value = "download "+  file.name
+        //处理返回的数据......
+      }
+    }
+
+    xhr.send(form); //发送表单数据
+
+  }
+}
+
+var qrcode;
+function uploadText(){
+    console.log("I")
+
+    var text_tag = document.getElementById("text");
+
+    document.getElementById('qrcode').innerHTML = ""
+    qrcode = new QRCode(document.getElementById('qrcode'),{text: text_tag.value, width: 512, height: 512})
+    console.log(qrcode)
+
+    var form = new FormData();
+    form.append("text", text_tag.value); //实际业务的其他请求参数
+    form.append("csrfmiddlewaretoken", document.getElementsByName("csrfmiddlewaretoken")[0].value);
+    var xhr = new XMLHttpRequest();
+    var action = "/submit.uploadText"; //上传服务的接口地址
+    xhr.open("POST", action);
+    xhr.send(form); //发送表单数据
+    xhr.onreadystatechange = function(){
+      if(xhr.readyState==4 && xhr.status==200){
+	console.log(xhr.responseText)
+      }
+    }
+
+}
+
+window.onload=() => {
+    
+    uploadText();
+    new QRCode(document.getElementById('ip_qrcode'),{text:  location.href.replace(location.hostname, "{{localip}}"), width: 512, height: 512})
+} 
+</script>
+    </body>
+</html>
